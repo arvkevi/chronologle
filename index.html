@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chronologle</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="Daily chronological ordering puzzle — arrange events from earliest to latest">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>⏱️ Chronologle</h1>
+      <p id="puzzle-info" class="subtitle"></p>
+      <p class="tagline">Arrange events from <strong>earliest</strong> (top) to <strong>latest</strong> (bottom)</p>
+    </header>
+
+    <div id="loading">Loading today's puzzle…</div>
+
+    <div id="game" class="hidden">
+      <div id="score-preview">
+        <span id="multiplier-label">Per event: up to <strong id="multiplier-value">5</strong> pts</span>
+        <span id="max-label">Max possible: <strong id="max-value">25</strong></span>
+      </div>
+
+      <div class="timeline-wrapper">
+        <div class="timeline-cap timeline-cap-start">
+          <span class="timeline-cap-dot"></span>
+          <span class="timeline-cap-label">EARLIEST</span>
+        </div>
+        <div class="timeline-track">
+          <div id="event-list"></div>
+        </div>
+        <div class="timeline-cap timeline-cap-end">
+          <span class="timeline-cap-dot"></span>
+          <span class="timeline-cap-label">MOST RECENT</span>
+        </div>
+      </div>
+
+      <div id="controls">
+        <button id="add-event-btn" class="btn btn-secondary">
+          + Draw Another Event <span id="remaining-count">(5 remaining)</span>
+        </button>
+        <button id="submit-btn" class="btn btn-primary">Submit Order</button>
+      </div>
+    </div>
+
+    <div id="results" class="hidden">
+      <div id="results-header">
+        <h2 id="results-title"></h2>
+        <div id="results-score"></div>
+        <div id="results-breakdown"></div>
+        <div id="results-emoji"></div>
+      </div>
+      <div class="timeline-wrapper">
+        <div class="timeline-cap timeline-cap-start">
+          <span class="timeline-cap-dot"></span>
+          <span class="timeline-cap-label">EARLIEST</span>
+        </div>
+        <div class="timeline-track">
+          <div id="correct-order"></div>
+        </div>
+        <div class="timeline-cap timeline-cap-end">
+          <span class="timeline-cap-dot"></span>
+          <span class="timeline-cap-label">MOST RECENT</span>
+        </div>
+      </div>
+      <div id="results-actions">
+        <button id="share-btn" class="btn btn-primary">📋 Copy Results</button>
+        <span id="copied-msg" class="hidden">Copied!</span>
+      </div>
+    </div>
+
+    <details id="how-to-play">
+      <summary>How to Play</summary>
+      <div class="help-content">
+        <p><strong>Goal:</strong> Arrange the events in chronological order, earliest at the top.</p>
+        <p><strong>Drag</strong> events to reorder them. On mobile, tap and hold to drag.</p>
+        <p><strong>Add events</strong> for a higher score — each correct answer is worth more when you attempt more events. But be careful: more events means it's harder to get them all right!</p>
+        <p><strong>Scoring:</strong> Each event earns up to N points (where N = events attempted). You lose 1 point for each position you're off by. Being close still counts! 🟩 = perfect, 🟨 = off by 1, 🟧 = off by 2, 🟥 = off by 3+.</p>
+        <p><strong>Hints:</strong> Tap the <strong>?</strong> on any event to reveal its category — but each hint costs 1 point from your final score.</p>
+        <p>A new puzzle appears every day. Good luck!</p>
+      </div>
+    </details>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
