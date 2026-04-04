@@ -16,13 +16,13 @@
   // --- Modes ---
   const MODES = [
     { id: 'all', label: 'Grab Bag', categories: null },
+    { id: 'history', label: 'History', categories: ['history', 'politics'] },
     { id: 'movies-tv', label: 'Movies & TV', categories: ['movies', 'tv'] },
     { id: 'music', label: 'Music', categories: ['music'] },
+    { id: 'pop-culture', label: 'Pop Culture', categories: ['pop culture', 'celebrity', 'viral', 'fashion', 'food', 'social media'] },
+    { id: 'science-space', label: 'Science & Space', categories: ['science', 'space', 'medicine', 'disaster'] },
     { id: 'sports', label: 'Sports', categories: ['sports'] },
     { id: 'tech-gaming', label: 'Tech & Gaming', categories: ['tech', 'gaming', 'internet'] },
-    { id: 'pop-culture', label: 'Pop Culture', categories: ['pop culture', 'celebrity', 'viral', 'fashion', 'food', 'social media'] },
-    { id: 'history', label: 'History', categories: ['history', 'politics'] },
-    { id: 'science-space', label: 'Science & Space', categories: ['science', 'space', 'medicine', 'disaster'] },
   ];
 
   // --- State ---
@@ -206,16 +206,62 @@
   }
 
   // --- Mode selector rendering ---
+  function isModeCompleted(modeId) {
+    const key = STORAGE_KEY + (modeId === 'all' ? '' : '-' + modeId);
+    const data = JSON.parse(localStorage.getItem(key) || '{}');
+    return !!data[getTodayString()];
+  }
+
+  function getModeScore(modeId) {
+    const key = STORAGE_KEY + (modeId === 'all' ? '' : '-' + modeId);
+    const data = JSON.parse(localStorage.getItem(key) || '{}');
+    const result = data[getTodayString()];
+    return result ? result : null;
+  }
+
   function renderModeSelector() {
-    const container = document.getElementById('mode-selector');
-    container.innerHTML = '';
+    const toggle = document.getElementById('mode-dropdown-toggle');
+    const label = document.getElementById('mode-current-label');
+    const menu = document.getElementById('mode-dropdown-menu');
+    const currentModeObj = getModeById(currentMode);
+    const completed = isModeCompleted(currentMode);
+
+    label.textContent = (completed ? '✓ ' : '') + currentModeObj.label;
+    toggle.classList.toggle('completed', completed);
+
+    menu.innerHTML = '';
     MODES.forEach(mode => {
-      const btn = document.createElement('button');
-      btn.className = 'mode-pill' + (mode.id === currentMode ? ' active' : '');
-      btn.textContent = mode.label;
-      btn.dataset.mode = mode.id;
-      btn.addEventListener('click', () => switchMode(mode.id));
-      container.appendChild(btn);
+      const item = document.createElement('button');
+      const done = isModeCompleted(mode.id);
+      const result = getModeScore(mode.id);
+      item.className = 'mode-menu-item' +
+        (mode.id === currentMode ? ' active' : '') +
+        (done ? ' completed' : '');
+
+      let scoreText = '';
+      if (result) {
+        scoreText = `<span class="mode-score">${result.score}/${result.maxScore}</span>`;
+      }
+
+      item.innerHTML = `
+        <span class="mode-item-label">${done ? '✓ ' : ''}${mode.label}</span>
+        ${scoreText}
+      `;
+      item.addEventListener('click', () => {
+        menu.classList.add('hidden');
+        if (mode.id !== currentMode) switchMode(mode.id);
+      });
+      menu.appendChild(item);
+    });
+
+    // Toggle dropdown
+    toggle.onclick = () => menu.classList.toggle('hidden');
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#mode-dropdown')) {
+        menu.classList.add('hidden');
+      }
     });
   }
 
