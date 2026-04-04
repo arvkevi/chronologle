@@ -580,16 +580,6 @@ header h1 {
   flex: 1;
 }
 
-.btn-danger {
-  background: var(--incorrect-bg);
-  color: var(--incorrect);
-  border: 1px solid rgba(201, 68, 77, 0.25);
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: rgba(201, 68, 77, 0.2);
-}
-
 #remaining-count {
   font-weight: 400;
   opacity: 0.8;

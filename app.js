@@ -327,11 +327,6 @@
     btn.classList.toggle('btn-disabled', count === 0);
   }
 
-  function updateRemoveButton() {
-    const btn = document.getElementById('remove-event-btn');
-    btn.classList.toggle('hidden', drawnEvents.length === 0);
-  }
-
   function renderEventList() {
     const list = document.getElementById('event-list');
     list.innerHTML = '';
@@ -340,7 +335,6 @@
     });
     updateScorePreview();
     updateRemainingCount();
-    updateRemoveButton();
   }
 
   function createEventCard(ev, index) {
@@ -549,19 +543,6 @@
     }
   }
 
-  function removeLastDrawn() {
-    if (drawnEvents.length === 0 || submitted) return;
-    const ev = drawnEvents.pop();
-    const idx = activeEvents.findIndex(
-      ae => ae.event === ev.event && ae.date === ev.date
-    );
-    if (idx !== -1) activeEvents.splice(idx, 1);
-    revealedCategories.delete(ev.event);
-    revealedDecades.delete(ev.event);
-    reserveEvents.unshift(ev);
-    renderEventList();
-  }
-
   // --- Submit ---
   function submit() {
     if (submitted || activeEvents.length < MIN_EVENTS) return;
@@ -757,7 +738,7 @@
     startPuzzle();
 
     document.getElementById('add-event-btn').addEventListener('click', addEvent);
-    document.getElementById('remove-event-btn').addEventListener('click', removeLastDrawn);
+
     document.getElementById('submit-btn').addEventListener('click', () => {
       if (activeEvents.length < MIN_EVENTS) return;
       submit();
