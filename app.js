@@ -9,7 +9,9 @@
   const MIN_EVENTS = 3;
   const STORAGE_KEY = 'chronologle';
   const CATEGORY_HINT_COST = 1;
-  const DECADE_HINT_COST = 3;
+  function getDecadeHintCost() {
+    return Math.max(0, activeEvents.length - 3);
+  }
 
   // --- Modes ---
   const MODES = [
@@ -92,7 +94,7 @@
 
   function getHintPenalty() {
     return revealedCategories.size * CATEGORY_HINT_COST +
-           revealedDecades.size * DECADE_HINT_COST;
+           revealedDecades.size * getDecadeHintCost();
   }
 
   // --- Mode helpers ---
@@ -315,7 +317,7 @@
             <button class="hint-btn hint-category-btn ${catRevealed ? 'hidden' : ''}" title="Costs ${CATEGORY_HINT_COST} pt">Category <span class="hint-cost">−${CATEGORY_HINT_COST}</span></button>
             <span class="hint-revealed hint-cat-value ${catRevealed ? '' : 'hidden'}">${escapeHtml(ev.category || '')}</span>
           ` : ''}
-          <button class="hint-btn hint-decade-btn ${decRevealed ? 'hidden' : ''}" title="Costs ${DECADE_HINT_COST} pts">Decade <span class="hint-cost">−${DECADE_HINT_COST}</span></button>
+          <button class="hint-btn hint-decade-btn ${decRevealed ? 'hidden' : ''}" title="Costs ${getDecadeHintCost()} pts">Decade <span class="hint-cost">−${getDecadeHintCost()}</span></button>
           <span class="hint-revealed hint-dec-value ${decRevealed ? '' : 'hidden'}">${getDecade(ev.date)}</span>
         </div>
       </div>
@@ -337,7 +339,7 @@
     card.querySelector('.hint-decade-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       if (revealedDecades.has(ev.event)) return;
-      if (!confirm(`Reveal decade? This costs ${DECADE_HINT_COST} points.`)) return;
+      if (!confirm(`Reveal decade? This costs ${getDecadeHintCost()} points.`)) return;
       revealedDecades.add(ev.event);
       card.querySelector('.hint-decade-btn').classList.add('hidden');
       card.querySelector('.hint-dec-value').classList.remove('hidden');
@@ -694,6 +696,13 @@
       document.getElementById('loading').textContent =
         'Failed to load events. Make sure to serve this via a web server (e.g. npx serve).';
       return;
+    }
+
+    // Open "How to Play" on first visit, collapsed for returning players
+    const howToPlay = document.getElementById('how-to-play');
+    if (!localStorage.getItem('chronologle-seen')) {
+      howToPlay.open = true;
+      localStorage.setItem('chronologle-seen', '1');
     }
 
     currentMode = getModeFromHash();
