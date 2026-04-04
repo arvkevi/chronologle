@@ -17,6 +17,8 @@
   const MODES = [
     { id: 'all', label: 'Grab Bag', categories: null },
     { id: 'history', label: 'History', categories: ['history', 'politics'] },
+    { id: 'kpop', label: 'K-Pop', categories: ['kpop'] },
+    { id: 'miffy', label: 'Miffy', categories: ['miffy'] },
     { id: 'movies-tv', label: 'Movies & TV', categories: ['movies', 'tv'] },
     { id: 'music', label: 'Music', categories: ['music'] },
     { id: 'pop-culture', label: 'Pop Culture', categories: ['pop culture', 'celebrity', 'viral', 'fashion', 'food', 'social media'] },
