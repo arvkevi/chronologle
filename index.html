@@ -15,6 +15,38 @@
       <p class="tagline">Arrange events from <strong>earliest</strong> (top) to <strong>latest</strong> (bottom)</p>
     </header>
 
+    <details id="how-to-play">
+      <summary>How to Play</summary>
+      <div class="help-content">
+        <p><strong>Goal:</strong> Arrange the events in chronological order, earliest at the top.</p>
+        <p><strong>Drag</strong> events to reorder them. On mobile, tap and hold to drag.</p>
+        <p><strong>Draw more events</strong> for a higher max score, but they're harder to place. You can <strong>remove the last drawn event</strong> if you change your mind — no cherry-picking!</p>
+        <p><strong>Scoring:</strong> Getting an event in the exact right position earns big points. Being close earns much less — so precision matters!</p>
+        <table class="scoring-table">
+          <tr><td>🟩 Correct position</td><td><strong>N points</strong> (N = events attempted)</td></tr>
+          <tr><td>🟨 Off by 1</td><td><strong>2 points</strong></td></tr>
+          <tr><td>🟧 Off by 2</td><td><strong>1 point</strong></td></tr>
+          <tr><td>🟥 Off by 3+</td><td><strong>−1 point</strong></td></tr>
+        </table>
+        <p><strong>Example — is drawing a 6th event worth it?</strong><br>
+        Say you have 5 events all correct = <strong>25 pts</strong> (5×5). You draw a 6th. Now each correct event is worth 6 instead of 5, and max jumps to 36.</p>
+        <table class="scoring-table example-table">
+          <tr class="example-header"><td></td><td>Result</td><td>Score</td></tr>
+          <tr class="example-good"><td>😎</td><td>Nail it — all 6 correct</td><td><strong>36</strong> (+11)</td></tr>
+          <tr class="example-good"><td>🙂</td><td>New event off by 1, bumps 1 other</td><td><strong>28</strong> (+3)</td></tr>
+          <tr class="example-bad"><td>😬</td><td>New event off by 1, bumps 2 others</td><td><strong>24</strong> (−1)</td></tr>
+          <tr class="example-bad"><td>💀</td><td>New event off by 3, bumps 3 others</td><td><strong>17</strong> (−8)</td></tr>
+        </table>
+        <p>The reward is huge if you're confident, but one bad placement can cascade and cost you. Choose wisely!</p>
+        <p><strong>Hints:</strong></p>
+        <ul>
+          <li><strong>Category</strong> — reveals the event type (e.g. sports, tech). Costs <strong>1 point</strong>.</li>
+          <li><strong>Decade</strong> — reveals the decade (e.g. 1990s). Costs <strong>N − 3 points</strong> (where N = events attempted). The more events you draw, the more expensive!</li>
+        </ul>
+        <p>A new puzzle appears every day. Good luck!</p>
+      </div>
+    </details>
+
     <div id="mode-selector"></div>
 
     <div id="loading">Loading today's puzzle…</div>
@@ -89,37 +121,6 @@
       </div>
     </div>
 
-    <details id="how-to-play">
-      <summary>How to Play</summary>
-      <div class="help-content">
-        <p><strong>Goal:</strong> Arrange the events in chronological order, earliest at the top.</p>
-        <p><strong>Drag</strong> events to reorder them. On mobile, tap and hold to drag.</p>
-        <p><strong>Draw more events</strong> for a higher max score, but they're harder to place. You can <strong>remove the last drawn event</strong> if you change your mind — no cherry-picking!</p>
-        <p><strong>Scoring:</strong> Getting an event in the exact right position earns big points. Being close earns much less — so precision matters!</p>
-        <table class="scoring-table">
-          <tr><td>🟩 Correct position</td><td><strong>N points</strong> (N = events attempted)</td></tr>
-          <tr><td>🟨 Off by 1</td><td><strong>2 points</strong></td></tr>
-          <tr><td>🟧 Off by 2</td><td><strong>1 point</strong></td></tr>
-          <tr><td>🟥 Off by 3+</td><td><strong>−1 point</strong></td></tr>
-        </table>
-        <p><strong>Example — is drawing a 6th event worth it?</strong><br>
-        Say you have 5 events all correct = <strong>25 pts</strong> (5×5). You draw a 6th. Now each correct event is worth 6 instead of 5, and max jumps to 36.</p>
-        <table class="scoring-table example-table">
-          <tr class="example-header"><td></td><td>Result</td><td>Score</td></tr>
-          <tr class="example-good"><td>😎</td><td>Nail it — all 6 correct</td><td><strong>36</strong> (+11)</td></tr>
-          <tr class="example-good"><td>🙂</td><td>New event off by 1, bumps 1 other</td><td><strong>28</strong> (+3)</td></tr>
-          <tr class="example-bad"><td>😬</td><td>New event off by 1, bumps 2 others</td><td><strong>24</strong> (−1)</td></tr>
-          <tr class="example-bad"><td>💀</td><td>New event off by 3, bumps 3 others</td><td><strong>17</strong> (−8)</td></tr>
-        </table>
-        <p>The reward is huge if you're confident, but one bad placement can cascade and cost you. Choose wisely!</p>
-        <p><strong>Hints:</strong></p>
-        <ul>
-          <li><strong>Category</strong> — reveals the event type (e.g. sports, tech). Costs <strong>1 point</strong>.</li>
-          <li><strong>Decade</strong> — reveals the decade (e.g. 1990s). Costs <strong>3 points</strong>. Powerful but expensive!</li>
-        </ul>
-        <p>A new puzzle appears every day. Good luck!</p>
-      </div>
-    </details>
   </div>
 
   <script src="app.js"></script>
