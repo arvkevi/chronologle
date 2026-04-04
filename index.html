@@ -20,7 +20,7 @@
       <div class="help-content">
         <p><strong>Goal:</strong> Arrange the events in chronological order, earliest at the top.</p>
         <p><strong>Drag</strong> events to reorder them. On mobile, tap and hold to drag.</p>
-        <p><strong>Draw more events</strong> for a higher max score, but they're harder to place. You can <strong>remove the last drawn event</strong> if you change your mind — no cherry-picking!</p>
+        <p><strong>Draw more events</strong> for a higher max score, but they're harder to place. Once you draw an event, you're stuck with it — choose wisely!</p>
         <p><strong>Scoring:</strong> Getting an event in the exact right position earns big points. Being close earns much less — so precision matters!</p>
         <table class="scoring-table">
           <tr><td>🟩 Correct position</td><td><strong>N points</strong> (N = events attempted)</td></tr>
@@ -94,9 +94,6 @@
         <div id="draw-controls">
           <button id="add-event-btn" class="btn btn-secondary">
             + Draw Event <span id="remaining-count">(5 remaining)</span>
-          </button>
-          <button id="remove-event-btn" class="btn btn-danger hidden">
-            − Remove Last Drawn
           </button>
         </div>
         <button id="submit-btn" class="btn btn-primary">Submit Order</button>
