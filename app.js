@@ -406,6 +406,64 @@
 
   // --- Desktop Drag & Drop ---
   let dragSrcIndex = null;
+  let dropIndicatorEl = null;
+
+  function getDropIndicator() {
+    if (!dropIndicatorEl) {
+      dropIndicatorEl = document.createElement('div');
+      dropIndicatorEl.className = 'drop-indicator';
+      // The indicator is a valid drop target too — if the user releases
+      // directly on it we still want the drop to register.
+      dropIndicatorEl.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      });
+      dropIndicatorEl.addEventListener('drop', onDropOnIndicator);
+    }
+    return dropIndicatorEl;
+  }
+
+  function showDropIndicator(card, position) {
+    const list = card.parentElement;
+    if (!list) return;
+    const indicator = getDropIndicator();
+    const reference = position === 'above' ? card : card.nextSibling;
+    // Avoid no-op re-insertion (which would restart the CSS animation).
+    if (indicator.parentElement === list && indicator.nextSibling === reference) return;
+    list.insertBefore(indicator, reference);
+  }
+
+  // Resolves the target index in `activeEvents` based on where the indicator
+  // currently sits in the DOM (between two `.event-card` siblings).
+  function indicatorTargetIndex() {
+    if (!dropIndicatorEl || !dropIndicatorEl.parentElement) return null;
+    let next = dropIndicatorEl.nextElementSibling;
+    while (next && !next.classList.contains('event-card')) {
+      next = next.nextElementSibling;
+    }
+    return next ? parseInt(next.dataset.index) : activeEvents.length;
+  }
+
+  function highlightMovedCard(targetIndex) {
+    requestAnimationFrame(() => {
+      const list = document.getElementById('event-list');
+      const card = list && list.querySelector(`.event-card[data-index="${targetIndex}"]`);
+      if (!card) return;
+      card.classList.add('just-moved');
+      card.addEventListener('animationend', () => card.classList.remove('just-moved'), { once: true });
+    });
+  }
+
+  function performReorder(srcIndex, targetIndex) {
+    if (srcIndex === null || targetIndex === null) return false;
+    if (targetIndex > srcIndex) targetIndex--;
+    if (targetIndex === srcIndex) return false;
+    const [moved] = activeEvents.splice(srcIndex, 1);
+    activeEvents.splice(targetIndex, 0, moved);
+    renderEventList();
+    highlightMovedCard(targetIndex);
+    return true;
+  }
 
   function onDragStart(e) {
     if (e.target.closest('.hint-btn')) { e.preventDefault(); return; }
@@ -429,34 +487,58 @@
     e.dataTransfer.dropEffect = 'move';
     const card = e.target.closest('.event-card');
     if (!card || parseInt(card.dataset.index) === dragSrcIndex) return;
-    clearDragIndicators();
     const rect = card.getBoundingClientRect();
     const midY = rect.top + rect.height / 2;
-    card.classList.add(e.clientY < midY ? 'drag-over-above' : 'drag-over-below');
+    showDropIndicator(card, e.clientY < midY ? 'above' : 'below');
   }
 
-  function onDragLeave(e) {
-    const card = e.target.closest('.event-card');
-    if (card) card.classList.remove('drag-over-above', 'drag-over-below');
+  function onDragLeave() {
+    // Indicator is managed by onDragOver/onDragEnd; no per-card cleanup needed.
   }
 
   function onDrop(e) {
     e.preventDefault();
+    e.stopPropagation();
     const card = e.target.closest('.event-card');
     if (!card) return;
     const dropIndex = parseInt(card.dataset.index);
     if (dragSrcIndex === null || dragSrcIndex === dropIndex) return;
     const rect = card.getBoundingClientRect();
-    let targetIndex = e.clientY < rect.top + rect.height / 2 ? dropIndex : dropIndex + 1;
-    if (targetIndex > dragSrcIndex) targetIndex--;
-    const [moved] = activeEvents.splice(dragSrcIndex, 1);
-    activeEvents.splice(targetIndex, 0, moved);
-    renderEventList();
+    const targetIndex = e.clientY < rect.top + rect.height / 2 ? dropIndex : dropIndex + 1;
+    performReorder(dragSrcIndex, targetIndex);
+  }
+
+  function onDropOnIndicator(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const targetIndex = indicatorTargetIndex();
+    performReorder(dragSrcIndex, targetIndex);
+  }
+
+  // Fallback handlers on the list itself: catch fast drops that land in the
+  // 8px flex-gap between cards (not on a card and not on the 4px indicator).
+  // Bound once during init.
+  function attachListDropFallback() {
+    const listEl = document.getElementById('event-list');
+    if (!listEl || listEl._dropFallbackBound) return;
+    listEl._dropFallbackBound = true;
+    listEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+    listEl.addEventListener('drop', (e) => {
+      // Card / indicator drop handlers stopPropagation, so we only get
+      // here when the drop landed in empty list space.
+      e.preventDefault();
+      const targetIndex = indicatorTargetIndex();
+      if (targetIndex !== null) performReorder(dragSrcIndex, targetIndex);
+    });
   }
 
   function clearDragIndicators() {
-    document.querySelectorAll('.event-card').forEach(c =>
-      c.classList.remove('drag-over-above', 'drag-over-below'));
+    if (dropIndicatorEl && dropIndicatorEl.parentElement) {
+      dropIndicatorEl.parentElement.removeChild(dropIndicatorEl);
+    }
   }
 
   // --- Touch Drag & Drop ---
@@ -472,8 +554,8 @@
     touchDragIndex = parseInt(card.dataset.index);
     card._touchTimer = setTimeout(() => {
       e.preventDefault();
-      card.classList.add('dragging');
       createTouchGhost(card, e.touches[0]);
+      card.classList.add('dragging');
       document.addEventListener('touchmove', onTouchMove, { passive: false });
       document.addEventListener('touchend', onTouchEnd);
     }, 150);
@@ -497,13 +579,17 @@
     e.preventDefault();
     const touch = e.touches[0];
     if (touchGhost) touchGhost.style.top = touch.clientY - touchGhost.offsetHeight / 2 + 'px';
-    clearDragIndicators();
+
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
     const card = el ? el.closest('.event-card') : null;
     touchCurrentCard = card;
     if (card && parseInt(card.dataset.index) !== touchDragIndex) {
       const rect = card.getBoundingClientRect();
-      card.classList.add(touch.clientY < rect.top + rect.height / 2 ? 'drag-over-above' : 'drag-over-below');
+      showDropIndicator(card, touch.clientY < rect.top + rect.height / 2 ? 'above' : 'below');
+    } else if (el !== dropIndicatorEl) {
+      // Keep the indicator visible when the finger hovers over it; only
+      // clear when the finger leaves both cards and the indicator.
+      clearDragIndicators();
     }
   }
 
@@ -511,19 +597,31 @@
     document.removeEventListener('touchmove', onTouchMove);
     document.removeEventListener('touchend', onTouchEnd);
     if (touchGhost) { touchGhost.remove(); touchGhost = null; }
-    clearDragIndicators();
-    document.querySelectorAll('.event-card.dragging').forEach(c => c.classList.remove('dragging'));
-    if (touchCurrentCard && touchDragIndex !== null) {
-      const dropIndex = parseInt(touchCurrentCard.dataset.index);
-      if (touchDragIndex !== dropIndex) {
-        const touch = e.changedTouches[0];
-        const rect = touchCurrentCard.getBoundingClientRect();
-        let targetIndex = touch.clientY < rect.top + rect.height / 2 ? dropIndex : dropIndex + 1;
-        if (targetIndex > touchDragIndex) targetIndex--;
-        const [moved] = activeEvents.splice(touchDragIndex, 1);
-        activeEvents.splice(targetIndex, 0, moved);
-        renderEventList();
+
+    const touch = e.changedTouches[0];
+
+    // Compute the target BEFORE clearing the indicator (we may need its DOM position).
+    let targetIndex = null;
+    if (touchDragIndex !== null) {
+      if (touchCurrentCard) {
+        const dropIndex = parseInt(touchCurrentCard.dataset.index);
+        if (dropIndex !== touchDragIndex) {
+          const rect = touchCurrentCard.getBoundingClientRect();
+          targetIndex = touch.clientY < rect.top + rect.height / 2 ? dropIndex : dropIndex + 1;
+        }
+      } else {
+        // Finger released over the indicator (or empty space) — fall back
+        // to the indicator's current DOM position.
+        targetIndex = indicatorTargetIndex();
       }
+    }
+
+    clearDragIndicators();
+    document.querySelectorAll('.event-card.dragging').forEach(c =>
+      c.classList.remove('dragging'));
+
+    if (targetIndex !== null) {
+      performReorder(touchDragIndex, targetIndex);
     }
     touchDragIndex = null;
     touchCurrentCard = null;
@@ -738,6 +836,7 @@
     filterEventsByMode();
     renderModeSelector();
     startPuzzle();
+    attachListDropFallback();
 
     document.getElementById('add-event-btn').addEventListener('click', addEvent);
 
