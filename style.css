@@ -655,206 +655,200 @@ header h1 {
   margin-bottom: 8px;
 }
 
-/* Results timeline cards */
-#correct-order {
+/* ===== Side-by-side results comparison ===== */
+/* Widen the app shell while viewing results so the two columns have room. */
+body.results-view #app {
+  max-width: 880px;
+}
+
+#results-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  position: relative; /* anchor for the SVG connector overlay */
+}
+
+/* SVG connector that draws a curve between matched rows on hover. */
+#result-connector {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 0;
+}
+
+#result-connector path {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgba(74, 144, 217, 0.55));
+  transition: opacity 0.18s ease;
+}
+
+#result-connector.active path {
+  opacity: 1;
+}
+
+.result-column {
+  min-width: 0; /* allow children to shrink/wrap inside grid track */
+}
+
+.result-column-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 8px 6px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: 4px 0;
+  gap: 6px;
+  counter-reset: result-row;
 }
 
-#correct-order h3 {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.result-card {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  padding: 0;
-  position: relative;
-  min-height: 64px;
-}
-
-/* Year column on the left */
-.result-year {
-  width: 52px;
-  flex-shrink: 0;
+.result-row {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding-right: 12px;
-  font-size: 0.8rem;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  position: relative;
+  z-index: 1; /* sit above the SVG connector */
+  /* Fixed height keeps left & right rows aligned regardless of text length. */
+  min-height: 76px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  cursor: pointer;
+}
+
+.result-row .row-position {
   font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-width: 20px;
+  text-align: center;
+  align-self: center;
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.result-row .row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-row .row-event {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  /* Clamp to 2 lines so all rows stay the same size; full text via title attr. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+          line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.result-row .row-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 0.7rem;
   color: var(--text-muted);
 }
 
-/* Timeline node (dot) */
-.result-node {
-  position: relative;
-  width: var(--tl-dot);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.result-row .row-distance {
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accuracy color states */
+.result-row.correct {
+  background: var(--correct-bg);
+  border-color: rgba(83, 141, 78, 0.3);
+}
+.result-row.correct .row-position,
+.result-row.correct .row-distance { color: var(--correct); }
+
+.result-row.close {
+  background: var(--accent-bg);
+  border-color: rgba(226, 168, 41, 0.3);
+}
+.result-row.close .row-position,
+.result-row.close .row-distance { color: var(--accent); }
+
+.result-row.incorrect {
+  background: var(--incorrect-bg);
+  border-color: rgba(201, 68, 77, 0.3);
+}
+.result-row.incorrect .row-position,
+.result-row.incorrect .row-distance { color: var(--incorrect); }
+
+/* Per-card score badge sits to the LEFT of the user-order card,
+   outside its border, color-matched to the accuracy state. */
+.result-row .row-score {
+  position: absolute;
+  right: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.result-row.correct .row-score { color: var(--correct); }
+.result-row.close .row-score { color: var(--accent); }
+.result-row.incorrect .row-score { color: var(--incorrect); }
+
+/* Cross-column match highlight (hover one side, peer lights up). */
+.result-row.match-highlight {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 2px var(--primary), 0 4px 14px rgba(74, 144, 217, 0.3);
+  border-color: var(--primary);
   z-index: 1;
 }
 
-.result-node::before {
-  content: '';
-  width: var(--tl-dot);
-  height: var(--tl-dot);
-  border-radius: 50%;
-  border: var(--tl-width) solid var(--text-muted);
-  background: var(--surface);
-  flex-shrink: 0;
+/* On narrow screens, stack the two columns vertically. */
+@media (max-width: 540px) {
+  #results-comparison {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  /* Connector between far-apart stacked rows is more confusing than helpful. */
+  #result-connector { display: none; }
 }
 
-/* Connector line between nodes */
-.result-card:not(:last-child) .result-node::after {
-  content: '';
-  position: absolute;
-  top: calc(50% + var(--tl-dot) / 2);
-  left: 50%;
-  transform: translateX(-50%);
-  width: var(--tl-width);
-  height: calc(100% - var(--tl-dot) / 2);
-  background: var(--border);
-}
-
-.result-card:not(:first-child) .result-node-top-line {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: var(--tl-width);
-  height: calc(50% - var(--tl-dot) / 2);
-  background: var(--border);
-}
-
-/* Result content */
-.result-content {
-  flex: 1;
-  padding: 8px 0 8px 14px;
-  border-left: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.result-info {
-  flex: 1;
-}
-
-.result-event-name {
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 1px;
-  line-height: 1.3;
-}
-
-.result-date {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.result-position {
-  font-size: 0.7rem;
-  font-weight: 500;
-  margin-top: 1px;
-}
-
-.result-points {
-  font-weight: 700;
-  font-size: 0.85rem;
-  flex-shrink: 0;
-  min-width: 32px;
-  text-align: right;
-  padding-right: 4px;
-}
-
-/* Result states */
-.result-card.correct .result-node::before {
-  border-color: var(--correct);
-  background: var(--correct);
-}
-
-.result-card.correct .result-event-name {
-  color: var(--text);
-}
-
-.result-card.correct .result-year {
-  color: var(--correct);
-}
-
-.result-card.correct .result-points {
-  color: var(--correct);
-}
-
-.result-card.close .result-node::before {
-  border-color: var(--accent);
-  background: var(--accent);
-}
-
-.result-card.close .result-year {
-  color: var(--accent);
-}
-
-.result-card.close .result-position {
-  color: var(--accent);
-}
-
-.result-card.close .result-points {
-  color: var(--accent);
-}
-
-.result-card.incorrect .result-node::before {
-  border-color: var(--incorrect);
-  background: var(--incorrect);
-}
-
-.result-card.incorrect .result-year {
-  color: var(--incorrect);
-}
-
-.result-card.incorrect .result-position {
-  color: var(--incorrect);
-}
-
-.result-card.incorrect .result-points {
-  color: var(--incorrect);
-}
-
-/* Result card hover highlight */
-.result-content-inner {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  border: 1px solid transparent;
-}
-
-.result-card.correct .result-content-inner {
-  background: var(--correct-bg);
-  border-color: rgba(83, 141, 78, 0.2);
-}
-
-.result-card.close .result-content-inner {
-  background: var(--accent-bg);
-  border-color: rgba(226, 168, 41, 0.2);
-}
-
-.result-card.incorrect .result-content-inner {
-  background: var(--incorrect-bg);
-  border-color: rgba(201, 68, 77, 0.15);
+/* Below ~900px the body margin is too tight to fit the badge outside #app
+   (results-view max-width is 880px), so fold the badge inline at the
+   start of the row. */
+@media (max-width: 900px) {
+  .result-row .row-score {
+    position: static;
+    transform: none;
+    margin-right: 4px;
+    order: -1;
+  }
 }
 
 #results-actions {

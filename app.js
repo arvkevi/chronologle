@@ -288,6 +288,7 @@
     document.getElementById('results').classList.add('hidden');
     document.getElementById('loading').classList.remove('hidden');
     document.getElementById('loading').textContent = 'Loading…';
+    document.body.classList.remove('results-view');
   }
 
   // --- Rendering ---
@@ -669,6 +670,7 @@
   function showResults(result, correctOrder, dateStr) {
     document.getElementById('game').classList.add('hidden');
     document.getElementById('results').classList.remove('hidden');
+    document.body.classList.add('results-view');
 
     const pct = result.maxScore > 0 ? result.score / result.maxScore : 0;
     let title = 'Nice try!';
@@ -693,47 +695,142 @@
     }).join('');
     document.getElementById('results-emoji').textContent = emojiStr;
 
-    const container = document.getElementById('correct-order');
-    container.innerHTML = '';
+    const userList = document.getElementById('user-order-list');
+    const correctList = document.getElementById('correct-order-list');
+    userList.innerHTML = '';
+    correctList.innerHTML = '';
 
+    // Map "event|date" → correct index, so we can look up where each
+    // user-placed card actually belongs without an O(n) findIndex per row.
+    const correctIndexFor = new Map();
+    correctOrder.forEach((ev, i) => correctIndexFor.set(ev.event + '|' + ev.date, i));
+
+    function rowHTML(ev, displayPos, distance) {
+      const cls = distance === 0 ? 'correct' : distance === 1 ? 'close' : 'incorrect';
+      const distLabel = distance === 0 ? '✓' : `±${distance}`;
+      const title = escapeHtml(ev.event); // hover tooltip in case the row clamps to 2 lines
+      return {
+        cls,
+        html: `
+          <span class="row-position">${displayPos}</span>
+          <div class="row-body">
+            <div class="row-event" title="${title}">${escapeHtml(ev.event)}</div>
+            <div class="row-meta">
+              <span class="row-date">${formatDate(ev.date)}</span>
+              <span class="row-distance">${distLabel}</span>
+            </div>
+          </div>
+        `,
+      };
+    }
+
+    // User's submitted order (left column)
+    const n = activeEvents.length;
+    activeEvents.forEach((ev, userIdx) => {
+      const correctIdx = correctIndexFor.get(ev.event + '|' + ev.date);
+      const distance = Math.abs(userIdx - correctIdx);
+      const points = scoreForDistance(n, distance);
+      const { cls, html } = rowHTML(ev, userIdx + 1, distance);
+      const li = document.createElement('li');
+      li.className = `result-row ${cls}`;
+      li.dataset.matchKey = String(correctIdx);
+      const pointsLabel = points >= 0 ? '+' + points : String(points);
+      li.innerHTML = `<span class="row-score" aria-label="${points} points">${pointsLabel}</span>${html}`;
+      userList.appendChild(li);
+    });
+
+    // Correct chronological order (right column)
     correctOrder.forEach((ev, i) => {
       const userIdx = activeEvents.findIndex(
         ae => ae.event === ev.event && ae.date === ev.date
       );
       const distance = Math.abs(userIdx - i);
-      const points = scoreForDistance(result.attempted, distance);
-      const isCorrect = distance === 0;
-      const isClose = distance === 1;
-      const year = ev.date.split('-')[0];
-
-      const card = document.createElement('div');
-      card.className = `result-card ${isCorrect ? 'correct' : isClose ? 'close' : 'incorrect'}`;
-
-      let posLabel = '';
-      if (!isCorrect) {
-        posLabel = `<div class="result-position">You placed #${userIdx + 1} — off by ${distance}</div>`;
-      }
-
-      card.innerHTML = `
-        <div class="result-year">${year}</div>
-        <div class="result-node">
-          ${i > 0 ? '<div class="result-node-top-line"></div>' : ''}
-        </div>
-        <div class="result-content">
-          <div class="result-content-inner">
-            <div class="result-info">
-              <div class="result-event-name">${escapeHtml(ev.event)}</div>
-              <div class="result-date">${formatDate(ev.date)}</div>
-              ${posLabel}
-            </div>
-            <span class="result-points">${points > 0 ? '+' + points : points}</span>
-          </div>
-        </div>
-      `;
-      container.appendChild(card);
+      const { cls, html } = rowHTML(ev, i + 1, distance);
+      const li = document.createElement('li');
+      li.className = `result-row ${cls}`;
+      li.dataset.matchKey = String(i);
+      li.innerHTML = html;
+      correctList.appendChild(li);
     });
 
+    setupResultsMatchHighlight();
+
     document.getElementById('share-btn').onclick = () => shareResults(result, dateStr);
+  }
+
+  // Highlight the matching row in the other column on hover/tap so the
+  // user can quickly trace where each event ended up vs. where it should be.
+  // Also draws a curved SVG connector between the two matched rows.
+  let resultsMatchBound = false;
+  let activeMatchKey = null;
+  function setupResultsMatchHighlight() {
+    const comparison = document.getElementById('results-comparison');
+    if (!comparison) return;
+
+    const svg = document.getElementById('result-connector');
+    const path = svg && svg.querySelector('path');
+
+    const drawConnector = (key) => {
+      if (!svg || !path) return;
+      if (key == null) {
+        svg.classList.remove('active');
+        return;
+      }
+      const userRow = comparison.querySelector(`#user-order-list .result-row[data-match-key="${key}"]`);
+      const correctRow = comparison.querySelector(`#correct-order-list .result-row[data-match-key="${key}"]`);
+      if (!userRow || !correctRow) {
+        svg.classList.remove('active');
+        return;
+      }
+      const cb = comparison.getBoundingClientRect();
+      const ub = userRow.getBoundingClientRect();
+      const rb = correctRow.getBoundingClientRect();
+      // Anchor on the inner edges of each row, vertically centered.
+      const x1 = ub.right - cb.left;
+      const y1 = ub.top - cb.top + ub.height / 2;
+      const x2 = rb.left - cb.left;
+      const y2 = rb.top - cb.top + rb.height / 2;
+      // Cubic bezier with horizontal handles → smooth S-curve when the
+      // two rows are at different vertical positions.
+      const dx = Math.max(20, Math.abs(x2 - x1) * 0.5);
+      const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+      path.setAttribute('d', d);
+      svg.classList.add('active');
+    };
+
+    const highlight = (key) => {
+      activeMatchKey = key;
+      comparison.querySelectorAll('.result-row.match-highlight')
+        .forEach(r => r.classList.remove('match-highlight'));
+      if (key != null) {
+        comparison.querySelectorAll(`.result-row[data-match-key="${key}"]`)
+          .forEach(r => r.classList.add('match-highlight'));
+      }
+      drawConnector(key);
+    };
+
+    if (resultsMatchBound) return;
+    resultsMatchBound = true;
+
+    comparison.addEventListener('mouseover', (e) => {
+      const row = e.target.closest('.result-row');
+      if (!row) return;
+      highlight(row.dataset.matchKey);
+    });
+    comparison.addEventListener('mouseleave', () => highlight(null));
+    // Tap support: toggling on click works for both touch and mouse.
+    comparison.addEventListener('click', (e) => {
+      const row = e.target.closest('.result-row');
+      if (!row) { highlight(null); return; }
+      const already = row.classList.contains('match-highlight');
+      highlight(already ? null : row.dataset.matchKey);
+    });
+
+    // Keep the curve aligned if the viewport changes size while a match
+    // is pinned (e.g. mobile rotation, devtools open).
+    window.addEventListener('resize', () => {
+      if (activeMatchKey != null) drawConnector(activeMatchKey);
+    });
   }
 
   function shareResults(result, dateStr) {

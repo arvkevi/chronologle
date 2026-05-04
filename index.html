@@ -108,18 +108,16 @@
         <div id="results-breakdown"></div>
         <div id="results-emoji"></div>
       </div>
-      <div class="timeline-wrapper">
-        <div class="timeline-cap timeline-cap-start">
-          <span class="timeline-cap-dot"></span>
-          <span class="timeline-cap-label">EARLIEST</span>
+      <div id="results-comparison">
+        <div class="result-column">
+          <div class="result-column-header">Your Order</div>
+          <ol class="result-list" id="user-order-list"></ol>
         </div>
-        <div class="timeline-track">
-          <div id="correct-order"></div>
+        <div class="result-column">
+          <div class="result-column-header">Correct Order</div>
+          <ol class="result-list" id="correct-order-list"></ol>
         </div>
-        <div class="timeline-cap timeline-cap-end">
-          <span class="timeline-cap-dot"></span>
-          <span class="timeline-cap-label">MOST RECENT</span>
-        </div>
+        <svg id="result-connector" aria-hidden="true"><path d=""/></svg>
       </div>
       <div id="results-actions">
         <button id="share-btn" class="btn btn-primary">📋 Copy Results</button>
