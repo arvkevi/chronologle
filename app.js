@@ -179,8 +179,8 @@
 
   function scoreForDistance(n, distance) {
     if (distance === 0) return n;
-    if (distance === 1) return 2;
-    if (distance === 2) return 1;
+    if (distance === 1) return n - 2;
+    if (distance === 2) return n - 4;
     return -1; // off by 3+: active penalty
   }
 
