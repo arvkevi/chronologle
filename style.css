@@ -877,14 +877,15 @@ body.results-view #app {
   padding: 10px 16px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.9rem;
+  color: var(--text);
   background: var(--surface);
   transition: color 0.15s, background 0.15s;
   list-style: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 #how-to-play summary::-webkit-details-marker {
@@ -892,18 +893,33 @@ body.results-view #app {
 }
 
 #how-to-play summary::after {
-  content: '▸';
-  transition: transform 0.2s ease;
-  font-size: 0.8rem;
+  content: 'Show ▾';
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  background: rgba(74, 144, 217, 0.12);
+  color: var(--primary-hover);
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
 #how-to-play[open] summary::after {
-  transform: rotate(90deg);
+  content: 'Hide ▴';
+  background: rgba(74, 144, 217, 0.22);
+  color: #cfe3f7;
+  border-color: var(--primary-hover);
 }
 
 #how-to-play summary:hover {
-  color: var(--text);
   background: var(--surface-hover);
+}
+
+#how-to-play summary:hover::after {
+  background: rgba(74, 144, 217, 0.28);
+  color: #ffffff;
+  border-color: var(--primary-hover);
 }
 
 .help-content {
