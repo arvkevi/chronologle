@@ -2,7 +2,7 @@
 
 Daily chronological ordering puzzle. Five events appear each day — arrange them from earliest to latest. Draw more events to raise the stakes.
 
-**Live:** https://orderly.pages.dev
+**Live:** https://playorderly.app
 
 ## Local development
 
@@ -36,7 +36,7 @@ npx wrangler pages project create orderly --production-branch main
 npx wrangler pages deploy . --project-name orderly --branch main --commit-dirty=true
 ```
 
-The site will be live at https://orderly.pages.dev.
+The site will be live at https://playorderly.app.
 
 ## Adding events
 
