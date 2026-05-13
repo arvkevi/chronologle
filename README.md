@@ -1,8 +1,8 @@
-# Chronologle
+# Orderly
 
 Daily chronological ordering puzzle. Five events appear each day — arrange them from earliest to latest. Draw more events to raise the stakes.
 
-**Live:** https://chronologle.pages.dev
+**Live:** https://orderly.pages.dev
 
 ## Local development
 
@@ -25,7 +25,7 @@ Open http://localhost:8080 (or the port shown).
 npx wrangler login
 
 # Create the Pages project (only once)
-npx wrangler pages project create chronologle --production-branch main
+npx wrangler pages project create orderly --production-branch main
 ```
 
 ### Deploy
@@ -33,10 +33,10 @@ npx wrangler pages project create chronologle --production-branch main
 ```bash
 ./deploy.sh
 # or manually:
-npx wrangler pages deploy . --project-name chronologle --branch main --commit-dirty=true
+npx wrangler pages deploy . --project-name orderly --branch main --commit-dirty=true
 ```
 
-The site will be live at https://chronologle.pages.dev.
+The site will be live at https://orderly.pages.dev.
 
 ## Adding events
 

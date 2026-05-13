@@ -107,7 +107,7 @@ categories=(
     "urban legends debunked"
 )
 
-echo "=== Chronologle Bulk Event Generator ==="
+echo "=== Orderly Bulk Event Generator ==="
 echo "Categories to process: ${#categories[@]}"
 echo ""
 

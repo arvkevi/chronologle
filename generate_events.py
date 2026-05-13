@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate and maintain events for Chronologle.
+Generate and maintain events for Orderly.
 
 Usage:
     # Add events from a category using Claude API
@@ -252,7 +252,7 @@ Rules:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Chronologle event manager")
+    parser = argparse.ArgumentParser(description="Orderly event manager")
     sub = parser.add_subparsers(dest="command")
 
     sub.add_parser("validate", help="Validate events.json")

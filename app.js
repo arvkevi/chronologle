@@ -7,7 +7,7 @@
   const RESERVE_EVENTS = 5;
   const TOTAL_POOL = INITIAL_EVENTS + RESERVE_EVENTS;
   const MIN_EVENTS = 3;
-  const STORAGE_KEY = 'chronologle';
+  const STORAGE_KEY = 'orderly';
   const CATEGORY_HINT_COST = 1;
   function getDecadeHintCost() {
     return Math.max(0, activeEvents.length - 3);
@@ -844,7 +844,7 @@
       if (e.distance === 2) return '🟧';
       return '🟥';
     }).join('');
-    const text = `⏱️ Chronologle #${num}${modeLabel}\nScore: ${result.score}/${result.maxScore} (${result.attempted} events)\n${emoji}`;
+    const text = `⏱️ Orderly #${num}${modeLabel}\nScore: ${result.score}/${result.maxScore} (${result.attempted} events)\n${emoji}`;
 
     navigator.clipboard.writeText(text).then(() => {
       const msg = document.getElementById('copied-msg');
@@ -925,9 +925,9 @@
 
     // Open "How to Play" on first visit, collapsed for returning players
     const howToPlay = document.getElementById('how-to-play');
-    if (!localStorage.getItem('chronologle-seen')) {
+    if (!localStorage.getItem('orderly-seen')) {
       howToPlay.open = true;
-      localStorage.setItem('chronologle-seen', '1');
+      localStorage.setItem('orderly-seen', '1');
     }
 
     currentMode = getModeFromHash();
