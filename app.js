@@ -21,6 +21,7 @@
     { id: 'miffy', label: 'Miffy', categories: ['miffy'] },
     { id: 'movies-tv', label: 'Movies & TV', categories: ['movies', 'tv'] },
     { id: 'music', label: 'Music', categories: ['music'] },
+    { id: 'nba', label: 'NBA', categories: ['nba'] },
     { id: 'pop-culture', label: 'Pop Culture', categories: ['pop culture', 'celebrity', 'viral', 'fashion', 'food', 'social media'] },
     { id: 'science-space', label: 'Science & Space', categories: ['science', 'space', 'medicine', 'disaster'] },
     { id: 'sports', label: 'Sports', categories: ['sports'] },

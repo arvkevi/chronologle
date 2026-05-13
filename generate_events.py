@@ -200,6 +200,7 @@ Rules:
 - Events should be interesting and recognizable for a trivia game
 - Cover a wide time range
 - No duplicates
+- IMPORTANT: Do NOT include any year (or 4-digit number resembling a year) in the "event" text — the game hides the date until the player submits, and putting the year in the description would give it away. Phrase events without dates, e.g. "Michael Jordan hits The Last Shot to win 6th title" instead of "1998: Michael Jordan...".
 - Return ONLY the JSON array, no other text
 {sample_text}"""
 
@@ -226,12 +227,17 @@ Rules:
         return
 
     # Validate and deduplicate
+    year_pattern = re.compile(r"\b(1[6-9]\d{2}|20\d{2}|2100)\b")
     added = 0
+    skipped_year = 0
     for ev in new_events:
         if "event" not in ev or "date" not in ev:
             continue
         valid, _ = validate_date(ev.get("date", ""))
         if not valid:
+            continue
+        if year_pattern.search(ev["event"]):
+            skipped_year += 1
             continue
         key = ev["event"].lower().strip()
         if key in existing_names:
@@ -241,7 +247,8 @@ Rules:
         added += 1
 
     save_events(existing)
-    print(f"Generated {len(new_events)}, added {added} new events (skipped {len(new_events) - added} dupes/invalid)")
+    extra = f", {skipped_year} stripped (year in text)" if skipped_year else ""
+    print(f"Generated {len(new_events)}, added {added} new events (skipped {len(new_events) - added} dupes/invalid{extra})")
 
 
 def main():
